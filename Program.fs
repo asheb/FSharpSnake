@@ -3,13 +3,24 @@
 open Engine
 
 
-type State = { x: int }
+type State = { x: int; y: int }
 
-let update { x = x } = 
-    let shapes = seq { Rect(x, 10, 10, 10, Red) 
-                       Rect(x, 20, 10, 10, Green) }
-    ({ x = x + 10 }, shapes)
 
-run { title = "Snake"; state = { x = 0 }; update = update }
+let initialState = { x = 10; y = 10 }
+
+
+let update { x = x; y = y } input = 
+    let newState = match Seq.tryLast input with
+                   | Some(Up)    -> { x = x; y = y - 10 }
+                   | Some(Down)  -> { x = x; y = y + 10 }
+                   | Some(Left)  -> { x = x - 10; y = y }
+                   | Some(Right) -> { x = x + 10; y = y }
+                   | None        -> { x = x; y = y }
+
+    let shapes = seq { Rect(x, y, 10, 10, Green) }
+    (newState, shapes)
+
+
+run { title = "Snake"; state = initialState; update = update }
 
 

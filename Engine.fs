@@ -4,14 +4,22 @@ open System.Windows.Forms
 open System.Drawing
 
 
+type Key = Up | Down | Left | Right
 type Color = Green | Red
 type Shape = Rect of x: int * y: int * w: int * h: int * color: Color
-type Game<'state> = { title: string; state: 'state; update: 'state -> 'state * Shape seq }
+type Game<'state> = { title: string; state: 'state; update: 'state -> Key seq -> 'state * Shape seq }
 
 
 let private dotnetColor = function
     | Green -> System.Drawing.Color.Green
     | Red   -> System.Drawing.Color.Red
+
+let private convertInput = function
+    | Keys.Up    -> seq { Up }
+    | Keys.Down  -> seq { Down }
+    | Keys.Left  -> seq { Left }
+    | Keys.Right -> seq { Right }
+    | _          -> Seq.empty
 
 
 type MyForm<'state>(state: 'state, update) as this =
@@ -19,14 +27,20 @@ type MyForm<'state>(state: 'state, update) as this =
 
     let mutable state = state
     let mutable shapes = Seq.empty
-    let timer = new Timer(Interval = 100)
+    let mutable input = Seq.empty
+
+    let timer = new Timer(Interval = 10)
     do
         timer.Tick.Add <| fun _ ->
-            let (a, b) = update state
-            state <- a
-            shapes <- b
+            let (newState, newShapes) = update state input
+            state <- newState
+            shapes <- newShapes
+            input <- Seq.empty
             this.Refresh()
         timer.Start()
+
+        this.KeyDown.Add <| fun e ->
+            input <- Seq.append input (convertInput e.KeyCode)
 
     override _.OnPaint e =
         base.OnPaint(e)
