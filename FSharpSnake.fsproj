@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Compile Include="src\Engine.fs" />
-    <Compile Include="src\Program.fs" />
+    <Compile Include="src\Game.fs" />
   </ItemGroup>
 
 </Project>
