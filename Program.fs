@@ -3,19 +3,20 @@
 open Engine
 
 
-type CellXY = int * int
 type Field = { width: int; height: int }
-type State = { field: Field; snake: CellXY list }
+type CellXY = int * int
+type Dir = Up | Down | Left | Right
+type State = { field: Field; snake: CellXY list; dir: Dir }
 
 
-let dirVec = function
-    | Some(Up)    -> ( 0, -1)
-    | Some(Down)  -> ( 0, +1)
-    | Some(Left)  -> (-1,  0)
-    | Some(Right) -> (+1,  0)
-    | None        -> ( 0,  0)
+let keyToDir = function | Key.Up -> Up | Key.Down -> Down | Key.Left -> Left | Key.Right -> Right
+let move (x, y) = function | Up -> (x, y - 1) | Down -> (x, y + 1) | Left -> (x - 1, y) | Right -> (x + 1, y)
 
-let move (x, y) (dx, dy) = (x + dx, y + dy)
+
+let update state input = 
+    let dir = match Seq.tryLast input with | Some(key) -> keyToDir key | None -> state.dir
+    let snake = [ move state.snake[0] dir ]
+    { state with snake = snake; dir = dir }
 
 
 let draw cellSize state =
@@ -24,14 +25,11 @@ let draw cellSize state =
           for (x, y) in state.snake do Rect(margin + x * cellSize, margin + y * cellSize, cellSize, cellSize, Green) }
 
 
-let update state input = 
-    let dir = dirVec (Seq.tryLast input)
-    ({ state with snake = [ move state.snake[0] dir ] }, draw 10 state)
-
-
 run { title = "Snake"
-      state = { field = { width = 60; height = 40 }
-                snake = [ (5, 5) ] }
-      update = update }
-
+      size = (800, 600)
+      init = { field = { width = 60; height = 40 }
+               snake = [ (5, 5) ]
+               dir = Right }
+      update = update
+      draw = draw 10 }
 
