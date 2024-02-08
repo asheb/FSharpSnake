@@ -11,7 +11,8 @@ type Game<'state> = { title: string
                       size: int * int
                       init: 'state
                       update: 'state -> Key seq -> 'state
-                      draw: 'state -> Shape seq }
+                      draw: 'state -> Shape seq
+                      fps: int }
 
 
 let private dotnetColor = function
@@ -31,10 +32,9 @@ type MyForm<'state>(game: Game<'state>) as this =
     inherit Form()
 
     let mutable state = game.init
-    let mutable shapes = Seq.empty
     let mutable input = Seq.empty
 
-    let timer = new Timer(Interval = 100)
+    let timer = new Timer(Interval = 1000 / game.fps)
     do
         let (w, h) = game.size
         this.Width <- w
@@ -44,7 +44,6 @@ type MyForm<'state>(game: Game<'state>) as this =
         timer.Tick.Add <| fun _ ->
             state <- game.update state input
             input <- Seq.empty
-            shapes <- game.draw state
             this.Refresh()
         timer.Start()
 
@@ -53,8 +52,8 @@ type MyForm<'state>(game: Game<'state>) as this =
 
     override _.OnPaint e =
         base.OnPaint(e)
-        for sh in shapes do
-            match sh with
+        for shape in game.draw state do
+            match shape with
             | Rect(x, y, w, h, c) -> e.Graphics.FillRectangle(new SolidBrush(dotnetColor c), x, y, w, h)
 
 

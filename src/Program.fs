@@ -32,5 +32,6 @@ run { title = "Snake"
                snake = { length = 25; cells = [ (5, 5) ] }
                dir = Right }
       update = update
-      draw = draw 10 }
+      draw = draw 10
+      fps = 20 }
 
