@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="src\Util.fs" />
     <Compile Include="src\Engine.fs" />
     <Compile Include="src\Game.fs" />
   </ItemGroup>
